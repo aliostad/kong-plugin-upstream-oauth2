@@ -11,7 +11,7 @@ supported_platforms = {"linux", "macosx"}
 
 source = {
   url = "git://github.com/aliostad/kong-plugin-upstream-oauth2",
-  tag = "1.1.1",
+  tag = "master",
 }
 description = {
   summary = "A Kong plugin to negotiate oauth2 authentication with upstream services",
