@@ -4,7 +4,7 @@
 
 local UpstreamOAuth2 = {
   PRIORITY = 802,
-  VERSION = "1.1.0"
+  VERSION = "1.0.0"
 }
 
 local tokens = require "kong.plugins.upstream-oauth2-3ready.tokens"
