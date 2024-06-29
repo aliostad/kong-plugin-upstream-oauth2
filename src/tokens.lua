@@ -9,11 +9,11 @@ local urlmodule = require "socket.url"
 local ltn12 = require "ltn12"
 local socket = require "socket"
 
-function get_cache_key(token_url, client_id, scope)
-    return "upstream_oauth2_token_" .. token_url .. "_" .. client_id .. "_" .. (scope or "")
+function get_cache_key(token_url, client_id, scope, resource)
+    return "upstream_oauth2_token_" .. token_url .. "_" .. client_id .. "_" .. (scope or "") .. (resource or "")
 end
 
-function get_access_token(url, client_id, client_secret, grant_type, scope)
+function get_access_token(url, client_id, client_secret, grant_type, scope, resource)
     local parsed = urlmodule.parse(url)
     local request
 
@@ -29,7 +29,8 @@ function get_access_token(url, client_id, client_secret, grant_type, scope)
             grant_type = grant_type,
             client_id = client_id,
             client_secret = client_secret,
-            scope = scope
+            scope = scope,
+            resource = resource
         }
     )
 

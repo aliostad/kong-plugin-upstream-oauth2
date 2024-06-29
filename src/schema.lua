@@ -5,7 +5,7 @@
 local typedefs = require "kong.db.schema.typedefs"
 
 return {
-  name = "upstream-oauth2",
+  name = "upstream-oauth2-3ready",
   fields = {
     {
       config = {
@@ -35,6 +35,12 @@ return {
               required = false
             }
           },
+          {
+            resource = {
+              type = "string",
+              required = false
+            }
+          }
         }
       }
     }
