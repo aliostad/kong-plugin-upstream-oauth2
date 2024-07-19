@@ -4,7 +4,7 @@
 
 package = "kong-plugin-upstream-oauth2-3ready"
 
-version = "1.1.1-1"
+version = "1.2.1-1"
 
 local pluginName = package:match("^kong%-plugin%-(.+)$")  -- "upstream-oauth2-3ready"
 supported_platforms = {"linux", "macosx"}
