@@ -1,6 +1,7 @@
 -- SPDX-FileCopyrightText: 2020 Henri Chain <henri.chain@enioka.com>
 -- Modified by aliostad to make v3 ready
 -- SPDX-License-Identifier: Apache-2.0
+-- modifications for Azure by Ali Kheyrollahi
 
 local UpstreamOAuth2 = {
   PRIORITY = 802,
@@ -14,7 +15,7 @@ function UpstreamOAuth2:access(conf)
 
   local curtime = socket.gettime()
   local cache_key = tokens.get_cache_key(conf.token_url, 
-    conf.client_id, conf.scope, conf.resource)
+    conf.client_id, conf.scope, conf.resource, conf.managed_identity)
   local err, res
 
   for i = 1, 2 do
@@ -28,7 +29,8 @@ function UpstreamOAuth2:access(conf)
       conf.client_secret,
       "client_credentials",
       conf.scope,
-      conf.resource
+      conf.resource,
+      conf.managed_identity
     )
 
     -- preventively ask for new access token if about to expire
@@ -54,7 +56,7 @@ function UpstreamOAuth2:header_filter(conf)
   -- If auth doesn't work, delete token from cache
   if status == 401 then
     kong.cache:invalidate(tokens.get_cache_key(conf.token_url, 
-      conf.client_id, conf.scope, conf.resource))
+      conf.client_id, conf.scope, conf.resource, conf.managed_identity))
   end
 end
 

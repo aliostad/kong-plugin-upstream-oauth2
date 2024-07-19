@@ -1,6 +1,7 @@
 -- SPDX-FileCopyrightText: 2020 Henri Chain <henri.chain@enioka.com>
 --
 -- SPDX-License-Identifier: Apache-2.0
+-- modifications for Azure by Ali Kheyrollahi
 
 local http = require "socket.http"
 local https = require "ssl.https"
@@ -9,13 +10,19 @@ local urlmodule = require "socket.url"
 local ltn12 = require "ltn12"
 local socket = require "socket"
 
-function get_cache_key(token_url, client_id, scope, resource)
-    return "upstream_oauth2_token_" .. token_url .. "_" .. client_id .. "_" .. (scope or "") .. (resource or "")
+function get_cache_key(token_url, client_id, scope, resource, managed_identity)
+    return "upstream_oauth2_token_" .. token_url .. "_" .. client_id .. "_" .. (scope or "") .. (resource or "") .. (managed_identity or "")
 end
 
-function get_access_token(url, client_id, client_secret, grant_type, scope, resource)
-    local parsed = urlmodule.parse(url)
+function get_access_token(url, client_id, client_secret, grant_type, scope, resource, managed_identity)
+    local final_url = url
+    if (not url) and managed_identity then
+        final_url = "http://169.254.169.254/metadata/identity/oauth2/token?api-version=2018-02-01&resource=https%3A%2F%2Fmanagement.azure.com%2F"
+    end
+
+    local parsed = urlmodule.parse(final_url)
     local request
+    local method = managed_identity and "GET" or "POST"
 
     if parsed.scheme == "https" then
         request = https.request
@@ -33,19 +40,27 @@ function get_access_token(url, client_id, client_secret, grant_type, scope, reso
             resource = resource
         }
     )
+    
+    local headers = managed_identity and {
+        ["Metadata"] = "true"
+    } or {
+        ["Content-Length"] = tostring(#req_body),
+        ["Content-Type"] = "application/x-www-form-urlencoded"
+    }
 
     local res_body = {}
+    local source = nil
+    if not managed_identity then
+        source = ltn12.source.string(req_body)
+    end
 
     local ok, status =
         request(
         {
-            method = "POST",
-            source = ltn12.source.string(req_body),
-            headers = {
-                ["Content-Length"] = tostring(#req_body),
-                ["Content-Type"] = "application/x-www-form-urlencoded"
-            },
-            url = url,
+            method = method,
+            source = source,
+            headers = headers,
+            url = final_url,
             port = parsed.port,
             sink = ltn12.sink.table(res_body)
         }
