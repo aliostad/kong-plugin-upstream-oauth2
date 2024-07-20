@@ -11,7 +11,7 @@ local ltn12 = require "ltn12"
 local socket = require "socket"
 
 function get_cache_key(token_url, client_id, scope, resource, managed_identity)
-    return "upstream_oauth2_token_" .. token_url .. "_" .. client_id .. "_" .. (scope or "") .. (resource or "") .. (managed_identity or "")
+    return "upstream_oauth2_token_" .. token_url .. "_" .. client_id .. "_" .. (scope or "") .. (resource or "") .. tostring(managed_identity or "")
 end
 
 function get_access_token(url, client_id, client_secret, grant_type, scope, resource, managed_identity)
@@ -40,7 +40,7 @@ function get_access_token(url, client_id, client_secret, grant_type, scope, reso
             resource = resource
         }
     )
-    
+
     local headers = managed_identity and {
         ["Metadata"] = "true"
     } or {
